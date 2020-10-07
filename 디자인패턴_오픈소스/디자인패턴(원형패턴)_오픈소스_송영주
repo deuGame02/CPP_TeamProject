@@ -1,0 +1,260 @@
+<예제 1>
+//프로토타입 패턴은 객체의 복사품을 만드는 것. 
+//복제된 객체는 호출되는 객체의 현재 상태를 갖고 초기화 되는데,
+//얕은복사 혹은 깊은복사 기반.
+
+#include <iostream>
+
+using namespace std;
+
+class Quotation { //클래스
+protected: //접근 지정자
+    string type; //멤버 변수
+    int value; //멤버 변수
+public:
+    virtual Quotation *clone() = 0;
+    //virtual = 가상함수
+    //가상 함수는(virtual function) 은 파생 클래스에서 재정의할 멤버 함수를 의미.
+    //가상 함수는 자신을 호출하는 객체의 동적 타입에 따라 실제 호출할 함수가 결정.
+    //포인터 변수가 실제로 가리키는 객체를 참조하여 호출의 대상을 결정
+    //사용 방법 : virtual 클래스 멤버함수()
+    
+    string getType() { //멤버 함수
+        return type;
+    }
+    int getValue() { //멤버 함수
+        return value;
+    }
+};
+
+class CarQuotation : public Quotation { //CarQuotation클래스가 Quotation클래스 상속
+public:
+    CarQuotation(int number) { //생성자(매개변수 1개)
+        type = "Car";
+        value = number;
+    }
+
+    Quotation *clone() { //가상함수 실제 구현
+        return new CarQuotation(*this); //동적 할당
+    //this : 자기 자신 호출
+    }
+};
+class BikeQuotation : public Quotation { //BikeQuotation클래스가 Quotation클래스 상속
+public:
+    BikeQuotation(int number) { //생성자(매개변수 1개)
+        type = "Bike";
+        value = number;
+    }
+
+    Quotation *clone() { //가상함수 실제 구현
+        return new BikeQuotation(*this); //동적 할당
+    //this : 자기 자신 호출
+    }
+};
+
+class QuotationFactory { //클래스
+private: //접근 지정자
+    Quotation *carQuotation; //객체 포인터 선언
+    Quotation *bikeQuotation; //객체 포인터 선언
+public: //접근 지정자
+    QuotationFactory() { //생성자
+        carQuotation = new CarQuotation(10); //동적 할당
+        bikeQuotation = new BikeQuotation(20); //동적 할당
+    }
+    ~QuotationFactory() { //소멸자
+        delete bikeQuotation; //메모리 해제
+        delete carQuotation; //메모리 해제
+    }
+    Quotation *createQuotation(int typeId) {
+        if (typeId == 1) //typeId가 1일 때,
+            return carQuotation -> clone(); //CarQuotation클래스 안에 구현된 clone()함수에 접근
+        else //그 외의 경우
+            return bikeQuotation -> clone(); //BikeQuotation클래스 안에 구현된 clone()함수에 접근
+    }
+};
+
+int main() {
+    QuotationFactory *qf = new QuotationFactory(); //객체 포인터로 멤버 접근 = 동적 메모리 할당
+    Quotation *q; //객체 포인터 선언
+
+    q = qf -> createQuotation(1); //객체 포인터를 이용해 멤버 접근
+    delete q; //메모리 해제
+    q = qf -> createQuotation(2); //객체 포인터를 이용해 멤버 접근
+    delete q; //메모리 해제
+    delete qf; //메모리 해제
+
+    return 0;
+}
+//미리 특정형태(프로토타입)을 만들어 놓고 팩토리 패턴으로 호출할 때,
+//프로토 타입을 반환하여 활용할 수 있도록 하는 패턴
+
+/*
+<new 연산자를 사용한 동적할당>
+1) 객체 포인터를 선언한다.
+2) new 연산자를 사용해 객체를 위한 메모리를 동적 할당한다.
+3) new 연산자에 의해 생성자가 자동으로 호출된다.
+4) 객체 포인터를 사용해 멤버에 접근한다.
+
+클래스이름 *객체이름;
+객체이름 = new 클래스이름;
+객체이름 = new 클래스이름(매개변수 리스트);
+ex)
+Student *kim;
+kim = new Student();
+kim->showData();
+*/
+/
+/
+/
+/
+/
+<예제2>
+/Mgr에서 몬스트 클래스들의 원형을 보관하고 있고
+//생성할 때 Mgr에 존재하는 원형 객체를 복사하여 생성
+
+#include <iostream>
+#include <map>
+#include <string>
+
+using namespace std;
+
+class CMonster { //몬스터 클래스
+public: //접근지정자
+	CMonster() {} //생성자
+	CMonster(const CMonster& _rhs) {} //복사 생성자
+	~CMonster() {} //소멸자
+	
+	virtual CMonster* Clone_Object() = 0;
+	//가상함수 virtual
+	//가상 함수는(virtual function) 은 파생 클래스에서 재정의할 멤버 함수를 의미합니다.
+	// 가상 함수는 자신을 호출하는 객체의 동적 타입에 따라 실제 호출할 함수가 결정됩니다.
+	//사용 방법 : virtual 클래스의 멤버함수()
+	//포인터 변수가 실제로 가리키는 객체를 참조하여 호출의 대상을 결정
+
+	void Print_Name() { //멤버 함수
+		cout << m_szName << endl;
+	}
+
+protected: //접근지정자
+	const char* m_szName = nullptr;
+	//포인터 변수가 유효한 주소를 가르키지 않고 있음을 나타내기 위해 nullptr키워트 사용
+};
+
+class CMonster_1 : public CMonster { //몬스터1 클래스 : 몬스터 클래스를 상속
+public:
+	CMonster_1() {} //생성자
+	CMonster_1(const CMonster_1& _rhs) {} //복사 생성자
+	~CMonster_1() {} //소멸자
+private:
+	bool Initialize() {
+		if (0) {
+			return false;
+		}
+		else {
+			m_szName = "1번 몬스터";
+			return true;
+		}
+	}
+public:
+	static CMonster* Create_ProtoType() { //
+		CMonster_1* p1 = new CMonster_1; //객체 포인터 선언, 동적 메모리 할당
+		if (false == p1->Initialize()) { //객체 포인터를 이용해 멤버 접근
+			return nullptr;
+		}
+		else {
+			return p1;
+		}
+	}
+	CMonster* Clone_Object() { //가상 함수 실제 구현
+		return new CMonster_1(*this); //동적 메모리 할당
+		//this는 자기 자신 호출
+	}
+};
+
+class CMonster_2 : public CMonster { //몬스터2 클래스 : 몬스터 클래스를 상속
+public:
+	CMonster_2() {} //생성자
+	CMonster_2(const CMonster_1& _rhs) {} //복사 생성자
+	~CMonster_2() {} //소멸자
+private:
+	bool Initialize() {
+		if (0) {
+			return false;
+		}
+		else {
+			m_szName = "2번 몬스터";
+			return true;
+		}
+	}
+public:
+	static CMonster* Create_ProtoType() { //static 멤버
+		CMonster_2* p2 = new CMonster_2; //객체 포인터 선언, 동적 메모리 할당
+		if (false == p2->Initialize()) { //객체 포인터를 이용해 멤버 접근
+			return nullptr;
+		}
+		else {
+			return p2;
+		}
+	}
+	CMonster* Clone_Object() { //가상 함수 실제 구현
+		return new CMonster_2(*this); //동적 메모리 할당
+		//this는 자기 자신 호출
+	}
+};
+
+class Mgr { //몬스터 클래스의 원형 보관
+public:
+	Mgr() {} //생성자
+	Mgr(const Mgr& _rhs) {} //복사 생성자
+	~Mgr() {} //소멸자
+
+	void Add_Prototype(const char* _PrototypeTag, CMonster* _pMonster) { //멤버 함수
+		m_mPrototype.insert(map<const char*, CMonster*>::value_type(_PrototypeTag, _pMonster));
+		//insert(iterator it, element) : 벡터 내 it 위치에 element 삽입
+		//map<key, value> 쌍을 저장
+	}
+	CMonster* Clone_Prototype(const char* _PrototypeTag) {
+		map<const char*, CMonster*>::iterator iter = m_mPrototype.begin();
+		//iterator = 반복자
+		//컨테이너 원소들을 하니씩 순회 접근하기 위해 만들어진 컨테이너 원소에 대한 포인터
+		//원소를 읽기/기록하기 가능
+
+		//being() : 벡터의 첫 번째 원소에 대한 참조 리턴
+		//m_mPrototype.begin()은 m_mPrototype의 젓번째 원소를 가르킨다.
+
+		//컨테이너 = 데이터를 저장하고 검색하기 위해 담아두는 자료 구조를 구현한 클래스 (map 포함)
+
+		for (iter; iter != m_mPrototype.end(); ++iter) 
+			//m_mPrototype가 끝(마지막 원소 다음)가 끝을 가르키지 않을 경우 반복
+			//iterator에 ++ 연산 후 방향 : 다음 원소로 전진
+			//end() : 벡터의 끝(마지막 원소 다음)을 가르키는 참조 리턴
+			//m_mPrototype.end()은 m_mPrototype의 끝(마지막 원소 다음)을 가르킨다.
+			
+			if (false == strcmp(iter->first, _PrototypeTag)) {
+				//strcmp(str1, str2) : 문자열 비교
+				//같으면 0, str1 > str2 면 0보다 큰 수, str1 < str2 면 0보다 작은 수를 반환
+				return iter->second->Clone_Object(); //구현된 가상 함수로 접근
+			}
+		
+		return nullptr;
+	}
+
+private:
+	map<const char*, CMonster*> m_mPrototype;
+};
+
+int main()
+{
+	Mgr* pMgr = new Mgr; //객체 포인터 선언, 동적 메모리 할당
+
+	pMgr->Add_Prototype("1번 몬스터", CMonster_1::Create_ProtoType()); //객체 포인터를 이용해 멤버 접근
+	pMgr->Add_Prototype("2번 몬스터", CMonster_2::Create_ProtoType()); //객체 포인터를 이용해 멤버 접근
+
+	CMonster* pMonster_1 = pMgr->Clone_Prototype("1번 몬스터"); //객체 포인터 선언, 객체 포인터를 이용해 멤버함수 접근
+	CMonster* pMonster_2 = pMgr->Clone_Prototype("2번 몬스터"); //객체 포인터 선언, 객체 포인터를 이용해 멤버함수 접근
+
+	pMonster_1->Print_Name(); //객체 포인터를 이용해 멤버함수 접근
+	pMonster_2->Print_Name(); //객체 포인터를 이용해 멤버함수 접근
+
+	return 1;
+}
