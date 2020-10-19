@@ -1,0 +1,477 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+struct node 
+    //구조체 정의 ~> 사용할 자료형을 만듦 ~> 메모리 공간할당 ~> 변수 사용, 동적 메모리 할당 가능
+    //구조체 : 연관성 있는 서로 다른 자료형을 묶어 새로운 자료형을 만드는 것
+    //디폴트 접근지정 : public
+{
+    int num = 1;
+    int fill = 0;
+    char name[3][10];
+    node *next;
+    node *prev;
+};
+// 방의 구조체
+
+class hostel
+{
+    node *header[3];
+    node *cn;
+    // 클래스의 멤버변수
+
+public:
+    hostel()
+    {
+        for (int i = 0; i < 3; i++)
+            header[i] = NULL;
+    }
+    // 생성자에서 header 배열을 NULL값으로 초기화
+
+    void create()
+    // 방을 초기화하는 함수
+    // 1,9 번방은 1인실
+    // 2,4,6 번방은 2인실
+    // 3,5,7,8 번방은 3인실로 초기화
+    {
+        for (int i = 0; i < 3; i++)//반복문
+            //초기식 : i=0 / 조건식 : i<3 / 증감 : 후위증감 ~> 반복 실행(연산) 후 증감
+        {
+            for (int j = 0; j < 9; j++)//반복문
+                //초기식 : j=0 / 조건식 : j<9 / 증감 : 후위증감 ~> 반복 실행(연산) 후 증감
+            {
+                node *nn = new node;
+                //구조체(자료형)의 동적할당 ~> 데이터를 저장할 수 있는 저장공간 할당(임의로 지우기 전까지 저장공간 유효)
+                nn->next = NULL; //포인터로 구조체변수 next에 접근 후 NULL로 초기화
+                nn->prev = NULL; //포인터로 구조체변수 next에 접근 후 NULL로 초기화
+                //포인터변수->구조체변수 형태 사용
+                if (header[i] == NULL) //header[i]가 NULL이면
+                {
+                    header[i] = nn; //nn을 header[i]에 대입
+                    nn->num = 1; //포인터로 구조체변수 num에 접근 후 1로 초기화
+                }
+                else //header[i]가 NULL이 아니면
+                {
+                    node *cn = header[i];
+                    while (cn->next != NULL) //cn->next가 NULL이 아니면 반복문 실행
+                    {
+                        cn = cn->next; //포인터로 구조체변수 next에 접근 후 cn에 저장
+                    }
+                    if (j == 3 || j == 5 || j == 7 || j == 8) //방이 3이거나 5이거나 7이거나 8이면
+                    {
+                        cn->num = 3; //3으로 초기화
+                    }
+                    if (j == 2 || j == 4 || j == 6) //방이 2이거나 4이거나 6이면
+                    {
+                        cn->num = 2; //2로 초기화
+                    }
+                    cn->next = nn; //포인터로 구조체변수 next에 접근, nn의 값 저장
+                    nn->prev = cn; //포인터로 구조체변수 next에 접근, cn의 값 저장
+                }
+            }
+        }
+    }
+    
+    void display()
+    // 방의 상태를 출력하는 함수
+    // 몇층의 몇번방에 얼마나 사람이 더 들어갈수 있는지 확인
+    {
+        int j = 0, k = 0, l = 0;  //반복문 . 값 초기화
+        for (int i = 0; i < 48; i++)    // 초기식 : i =0 / 조건식 i <48 / 후위증감, 반복 실행 후 증감
+        {
+            cout << "--";              // 출력
+        }
+        cout << "\n "          // 반복 횟수 카운트
+        ;
+        for (int i = 1; i < 4; i++)  //반복문, 초기식 : i =1 / 조건식 i <4 / 후위증감, 반복 실행 후 증감
+        {
+            cout << "| Floor number : "<< i << " \t\t";  // 층 number 출력
+        }
+        cout << "|\n" ;       // 반복 횟수 카운트
+        for (int i = 0; i < 48; i++)
+        {
+            cout << "--";    // 출력
+        }
+        cn = header[j]; // header[j] 의 값을 cn에 대입
+        node *sn = header[j + 1]; //ex) j의 값이 2이면 (2+1 = 3)의 값을 구조체 포인터변수 sn에 대입한다.
+        node *tn = header[j + 2]; //ex) j의 값이 2이면 (2+2 = 4)의 값을 구조체 포인터변수 n에 대입한다.
+        cout << "\n ";
+        while (cn != NULL)   // cn의 값이 NULL이 아니면 반복
+        {
+            if (cn->fill != cn->num && cn->num != 0)     // cn의 num 값이 cn의 시작점부터 종단점 바로 앞까지의 수와 다르거나 0이 아닐 경우 
+            {
+                j++;                                     // j의 값 후위증감
+                cout << "| room no : "<< j;              // 방 번호 출력
+                cout << "->Vacant cots->"<< cn->num;     // 비어있는 방이라 표시
+            }
+            else                                         // 그게 아니라면
+            {                                            // j의 값 후위증감
+                j++;
+                cout << "| room no : "<< j;              // 방 번호 출력
+                cout << "->Present ";                    // 현재 방이 차있다의 의미
+            }
+            if (sn->fill != sn->num && sn->num != 0)    // sn의 num 값이 sn의 시작점부터 종단점 바로 앞까지의 수와 다르거나 0이 아닐 경우 
+            {
+                k++;                                    // k의 값 후위증감
+                cout << "\t | room no : "<< j;          // 방 번호 출력
+                cout << "->Vacant cots->"<< sn->num;    // 비어있는 방이라 표시
+            }
+            else                                        // 그게 아니라면
+            {
+                k++;
+                cout << " \t | room no : "<< j;        // 방 번호 출력
+                cout << "->Present ";                  // 현재 방이 차있다의 의미
+            }
+            if (tn->fill != tn->num && tn->num != 0)   // tn의 num 값이 tn의 시작점부터 종단점 바로 앞까지의 수와 다르거나 0이 아닐 경우
+            {
+                l++;                                   // l의 값 후위증감
+                cout << "\t | room no : "<< j;                      // 방 번호 출력
+                cout << "->Vacant cots->"<< tn->num << "| ";        // 비어있는 방이라 표시
+            }
+            else                     // 그게 아니라면
+            {
+                l++;                 // l의 값 후위증감
+                cout << "\t | room no : "<< j;    // j의 값이 2이면 방 번호:2 라고 출력
+                cout << "->Present "<< " | ";     // 현재 방이 차있다의 의미
+            }
+            cout << " \n ";
+            for (int i = 0; i < 48; i++)
+            {
+                cout << "--" ;
+            }
+            cout << "\n ";
+            cn = cn->next;    // cn에 구조체 변수 next의 값 저장
+            sn = sn->next;    // sn에 구조체 변수 next의 값 저장
+            tn = tn->next;    // tn에 구조체 변수 next의 값 저장
+        }
+    }
+
+    void book(int people)
+    // 예약을 진행하는 함수
+    // 인원수와 층수와 방번호를 입력받고
+    // 해당 인원수만큼의 이름을 입력받아 예약목록에 저장
+    {
+        int floor, room;     // 변수 선언
+        cout << "\nEnter the floor number : ";   
+        cin >> floor;      // 층수 입력
+        try
+        {
+            if (floor < 0 || floor > 4)     // 1~3층이 아닌 다른층 선택시 예외처리 (215~)
+
+            {
+                throw(floor);               
+            }
+            cn = header[floor - 1];         // 배열은 0부터 시작하니까 1층 선택시 header[0]에 저장
+
+            cout << "\nEnter the room number : ";
+            cin >> room;                    // 방 번호 입력
+            try
+            {
+
+                if (room < 0 || room > 10)   // 1~9번방이 아닌 다른방 선택시 예외처리 (210~)
+                {
+                    throw(room);      
+                }
+                else      // 모든걸 만족하면
+                {
+                    int i = 1;    // 반복문을 쓰기위한 (int i)
+                    while (i < room)   // 방 번호의 수만큼 반복
+                    {
+                        cn = cn->next;   // cn에 저장된 주솟값을 방의 번호로 옮기도록 선언
+                        i++;             
+                    }
+                    if (cn->num >= people)   // 입력된 people 값이 해당방의 구조체에 저장된 num의 숫자보다 작을경우
+                    {
+                        cout << "\nroom is vacant you can apply for room" ; // 방이 비어있어서 신청할 수 있다 표시
+
+                        int count = 0;    // count 값 0으로 초기화
+                        while (cn->fill - 1 <= cn->num)  
+                        {
+
+                            cout << "\nEnter name "<< cn -> fill + 1 << " : ";
+
+                            cin >> cn->name[cn->fill];
+                            count++;
+                            cn->fill++;            
+                            if (count >= people)    // count가 숙박인원 보다 크거나 같을 경우
+                            {
+                                break;              // 반복문을 벗어난다.
+                            }
+                        }
+                        cn->num = cn->num - people;    // cn의 num값에 숙박인원 수를 빼고 다시 cn에 저장
+                    }
+
+                    else    // 그게 아니면
+                    {
+                        cout << "\nroom is not vacant... SORRY !!!";   // 이 방은 비어있지 않다. 죄송합니다 표시
+                    }
+                }
+            }
+            catch (int r)    
+            {
+                cout << "\ninvalid room number : "<< r;    // 유효하지 않은 방 번호 표시
+            }
+        }
+        catch (int r)
+        {
+            cout << " \ninvalid floor number : " << r;    // 유효하지 않은 층 표시
+        }
+    }
+
+    void cancle(int check)//파라미터 1개
+    // 예약을 취소하는 함수
+    // 층 수와 방 번호 그리고 해당 방은 예약한 이름을 입력받고 
+    // 해당하는 이름과 일치하면 예약목록에서 삭제
+    {
+        //변수 선언
+        char namecheck[10];
+        int flag = 0;
+        int room, i = 1;
+        try //예외처리 try키워드
+            //특정 예외가 활성화 될 수 있는 코드 블럭을 식별
+        {
+            if (check < 0 || check > 4) //check가 0보다 작거나 4보다 크면
+
+            {
+                throw(check); //check에 대한 예외처리 throw키워드
+                //예외가 생겼음을 알린다.
+            }
+            else //그렇지 않으면 (if-else)
+            {
+                cout << " Enter the room no : ";
+                cin >> room; //방 번호를 입력 받는다.
+                try //예외처리 try키워드
+                {
+                    if (room < 0 || room > 10) //room번호가 0보다 작거나 10보다 크면
+                    {
+                        throw(room); //room에 대한 예외가 생겼음을 알린다.
+                    }
+                    else //그렇지 않으면
+                    {
+                        cout << " Enter the name to be delete :";
+
+                        cin >> namecheck; //이름을 확인한다.
+                        cn = header[check - 1]; //ex) check가 2이면(2-1 = 1)header[1]의 값을 cn에 대입한다.
+                        while (i < room) //room번호보다 i가 작으면 반복
+                        {
+                            cn = cn->next; //포인터로 구조체변수 next에 접근, 값을 cn에 저장
+                            i++; //후위증감 ~> 반복 후 증감연산
+                        }
+                        i = 0; //0으로 초기화
+                        while (i < 3) //i가 3보다 작으면 반복
+                        {
+
+                            if (!strcmp(namecheck, cn -> name[i]))//이름이 같지 않으면
+                                //strcmp() 함수 : 두 문자열을 비교
+                                //저장되어 있는 이름과 입력한 이름이 같은지 비교
+
+                            {
+                                flag = 1; //flag를 1로 초기화
+                                break; //반복문 종료
+                                i = 0; //i를 0으로 초기화
+                            }
+                            else //그렇지 않으면
+                                i++; //i에 후위증감 연산
+                        }
+                        if (flag == 1 && cn->fill != 0) //flag가 1이고 cn->fill가 0이 아니면
+                            //포인터로 구조체변수 fill에 접근
+                        {
+                            cout << "\nrecord deleted : "<< cn -> name[i];
+                            //삭제된 내역(이름)을 알려준다.
+
+                            cn->name[i][0] = 'A'; //2차원 배열 i행 0열에 문자 A 저장
+                            cn->name[i][1] ='\0'; //2차원 배열 i행 1열에 NULL문자 저장
+                            cn->fill--; //포인터로 구조체변수 fill에 접근, 후위감소
+                            cn->num++; ////포인터로 구조체변수 num에 접근, 후위증가
+                        }
+                        else //그렇지 않으면
+
+                            cout << "\nrecord not present ";
+                        //존재하지 않는다고 알려준다.
+                    }
+                }
+                catch (int r) //room에 대한 예외를 처리하는 코드
+                {
+                    cout << "\ninvalid room number : " << r;
+                    //방 번호가 유효하지 않다고 알려준다.
+                }
+            }
+        }
+
+        catch (int r) //check에 대한 예외를 처리하는 코드
+
+        {
+            cout << " \n floor dosn't exist : " << r;
+            //층이 존재하지 않는다고 알려준다.
+        }
+    }
+
+    void upgrade(int check)
+    {
+        // 예약을 수정하는 함수
+        // 해당 층과 방 번호, 그리고 예약한 사람의 이름을 입력받고
+        // 수정할 사람의 이름을 입력한 후 이름 수정
+
+        char namecheck[10]; // 사람의 이름 변수
+        int room, i = 1; // 방 번호 변수
+        try //첫번째 예외처리
+        {
+            if (check < 0 || check > 4) // 입력받은 층이 0보다 작거나 4보다 크면
+
+            {
+                throw(check); // 첫번째 예외 발생
+            }
+            else
+            {
+                cout << " Enter the room no : "; // 방 번호를 입력하세요. 출력됨
+                cin >> room; // (숫자) 방 번호 입력
+                try //두번째 예외처리
+                {
+                    if (room < 0 || room > 10) // 입력받은 방 번호가 0보다 작거나 10보다 크면
+
+                    {
+                        throw(room); // 두번째 예외 발생
+                    }
+                    else
+                    {
+                        cout << "Enter the name to be updated :"; // 예약한 사람 이름을 입력하세요. 가 출력됨
+
+                        cin >> namecheck; // 예약한 이름 입력
+                        cn = header[check - 1]; // 입력받은 층에 대한 정보를 가지고 있음
+                        while (i < room)  // 입력받은 방 번호만큼 while문 실행
+                        {
+                            cn = cn->next; // 예를 들어 2번방이면 1번방의 정보를 패스, 2번방의 정보를 가지고서 while
+                            i++;
+                        }
+                        i = 0; //초기화
+                        while (i < 3) // 층만큼 while문 실행
+                        {
+                            if (!strcmp(namecheck, cn->name[i])) // 예약한 사람 이름과 기존 예약된 이름과 비교하여 같으면
+
+                            {
+                                cout << "\nenter updated name : "; // 수정할 사람의 이름을 입력하세요. 가 출력됨
+
+                                cin >> cn->name[i]; // 수정한 이름 입력
+                                break;
+                            }
+                            else
+                                i++;
+                        }
+                        if (i >= 3) // 위에 while문에서 예약된 사람과 입력받은 예약한 사람의 이름이 다르면 i는 3이 나오게 된다.
+                            cout << "record not found ";
+                        else
+                        {
+                            cout << "\nrecord updated\nprevious name : " << namecheck << "\nupdated name : " << cn->name[i];
+                        }
+                    }
+                }
+                catch (int r) //두번째 예외처리
+                {
+                    cout << "\ninvalid room number : " << r; //유효하지 않은 방 번호라고 출력됨
+                }
+            }
+        }
+
+        catch (int r) // 첫번째 예외처리
+
+        {
+            cout << "\n floor dosn't exist : " << r; //층 없다고 표시
+        }
+    }
+};
+
+int main()
+{
+    hostel obj;
+    // 클래스 생성
+
+    int key;
+    // 케이스문을 실행하기위한 변수 (1~6)
+
+    char ch;
+    // Y나 N를 저장하는 변수
+
+    int floorcheck;
+    // 층을 저장하는 변수
+
+    obj.create();
+    // obj의 멤버함수 create실행
+
+    do
+    {
+        cout << "\n1.Book a room for 1 person\n2.Book a room for 2person\n3.Book a room for 3 person\n4.Display the current status of rooms\n5.cancle a cot\n6.upgrade"<< endl;
+        cout << " Enter your choice : "   ;
+        cin >> key;
+        // 숫자 입력
+        // 1. 한사람 예약
+        // 2. 두사람 예약
+        // 3. 세사람 예약
+        // 4. 방 상태 확인
+        // 5. 예약 취소
+        // 6. 예약 수정
+
+        switch (key)
+        {
+        case 1:
+        {
+            obj.book(1);
+            // 1을 매개변수로 book함수 실행
+
+            break;
+        }
+        case 2:
+        {
+            obj.book(2);
+            // 2을 매개변수로 book함수 실행
+
+            break;
+        }
+        case 3:
+        {
+            obj.book(3);
+            // 3을 매개변수로 book함수 실행
+
+            break;
+        }
+        case 4:
+        {
+            obj.display();
+            // display 함수 실행
+
+            break;
+        }
+        case 5:
+        {
+            cout << "Enter floor number : ";
+            cin >> floorcheck;
+            // 층 확인
+
+            obj.cancle(floorcheck);
+            // 층을 매개변수로 cancle함수 실행
+
+            break;
+        }
+        case 6:
+        {
+            cout << "Enter floor number : ";
+            cin >> floorcheck;
+            // 층 확인
+
+            obj.upgrade(floorcheck);
+            // 층을 매개변수로 upgrade함수 실행
+
+            break;
+        }
+
+        default:
+            cout << "\nInvalid choice ";
+            // 1~6이 아닐경우 "Invalid choice" 출력
+        }       
+
+        cout << "\nDo you want to continue(Y / N) ";
+        cin >> ch;
+        // 에약을 계속할지를 묻는 코드
+
+    } while (ch =='Y'|| ch =='y');
+    // Y입력시 예약을 처음부터 다시 진행
+}
