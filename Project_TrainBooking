@@ -1,0 +1,508 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int cnt;
+//회원가입 수 체크
+
+struct node
+{
+    int num = 1;
+    bool fill = false;
+    string name;
+    node* next;
+    node* prev;
+};
+// 기차 좌석의 구조체
+
+struct member
+{
+    string Id;
+    string name;
+    int age;
+};
+// 회원 구조체
+
+void DrawLine(bool bIsEndln = false)
+{
+    for (int i = 0; i < 20; i++)
+    {
+        cout << "--";
+    }
+    if (bIsEndln)
+        cout << endl;
+}
+
+class Train
+{
+    node* header[4];
+    node* cn;
+    // 클래스의 멤버변수
+
+    member info[30];
+    // 30명까지 회원가입 가능
+
+public:
+    Train()
+    {
+        for (int i = 0; i < 4; i++)
+            header[i] = NULL;
+    }
+    // 생성자에서 header 배열을 NULL값으로 초기화
+
+    void join()
+        // 회원가입 함수
+    {
+        int i, j;
+        for (i = 0; i < 30; i++)
+        {
+            cout << "\n회원가입을 계속 하시겠습니까? 1.yes 2.no : ";
+            cin >> j;
+
+            if (j == 1) {
+                cout << "ID 입력 : ";
+                cin >> info[i].Id;
+                cout << "이름 입력 : ";
+                cin >> info[i].name;
+                cout << "나이 입력 : ";
+                cin >> info[i].age;
+                cnt++;
+            }
+            if (j == 2)
+                break;
+        }
+    }
+
+    void joinlist()
+        // 회원관리 함수
+    {
+        int j;
+        cout << "1. 전체 회원정보 조회 / 2. 개인 회원정보 조회 : ";
+        cin >> j;
+        cout << endl;
+        if (j == 1)
+        {
+            for (int i = 0; i < cnt; i++)
+            {
+                cout << "ID : " << info[i].Id << endl << "이름 : " << info[i].name << endl << "나이 : " << info[i].age << endl << endl;
+            }
+        }
+        else
+        {
+            string Finding;
+            cout << "ID를 입력해주세요 : ";
+            cin >> Finding;
+            cout << endl;
+
+            for (int i = 0; i < cnt; i++)
+            {
+                if (Finding == info[i].Id)
+                {
+                    cout << "ID : " << info[i].Id << endl << "이름 : " << info[i].name << endl << "나이 : " << info[i].age << endl;
+                }
+            }
+        }
+    }
+
+    bool listcheck(string Id)
+        // 회원 판별 함수
+        // 회원 정보가 일치할시 true, false
+    {
+        for (int i = 0; i < cnt; i++)
+        {
+            if (Id == info[i].Id)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void create() // 기차 좌석 초기화
+    {
+        cout << "Start Create Funtion" << endl;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 1; j < 10; j++)
+            {
+                node* nn = new node;
+                nn->next = nullptr; //포인터 초기화에 NULL은 문제 발생소지높음  포인터초기화에는 nullptr을 사용할것
+                nn->prev = nullptr;
+                nn->num = j;
+
+                if (header[i] == nullptr)
+                {
+                    header[i] = nn;
+                }
+                else
+                {
+                    node* cn = header[i];
+                    while (nullptr != cn->next) //삽입시 오류
+                    {
+                        cn = cn->next;
+                    }
+
+                    cn->next = nn;//포인터로 구조체변수 next에 접근, nn의 값 저장
+                    nn->prev = cn;//포인터로 구조체변수 next에 접근, cn의 값 저장
+                }
+            }
+        }
+        cout << "Finish Create Funtion" << endl;
+    }
+
+    void display()// 기차 좌석 상태 확인
+    {
+        DrawLine(true);
+        cout << "Start Display Funtion" << endl;
+        DrawLine(true);
+        int iCount = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            cout << "|Row_" << 1 + i << "|";
+            if (i & 1)
+                cout << "\t\t";
+        }
+        cout << endl;
+        while (9 != iCount) // vector사용시 인덱스 접근 가능 반복문 1개로 해결 가능
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                cn = header[i];
+
+                for (int j = 0; j < iCount; j++)
+                    cn = cn->next;
+
+                if (nullptr != cn)
+                {
+                    if (cn->fill)
+                        cout << ' ' << cn->num << '(' << 'X' << ')' << ' ' << ' ';
+                    else
+                        cout << ' ' << cn->num << '(' << 'O' << ')' << ' ' << ' ';
+                }
+
+                if (1 == i)
+                {
+                    if (1 == iCount)
+                        cout << "|   기    |";
+                    else if (3 == iCount)
+                        cout << "|   차    |";
+                    else if (5 == iCount)
+                        cout << "|   통    |";
+                    else if (7 == iCount)
+                        cout << "|   로    |";
+                    else
+                        cout << "| \t|";
+                }
+            }
+            cout << endl;
+            iCount++;
+        }
+        DrawLine(true);
+        cout << "Finish Display Funtion" << endl;
+        DrawLine(true);
+    }
+
+    void book(string id)
+        // 기차 좌석 예약
+        // 문자열을 입력받아 해당 회원 id로 예약 진행
+        // 열과 행을 숫자로 입력받아 해당 좌석을 예약
+    {
+        int row, col;
+
+        if (listcheck(id) == true)
+        {
+            cout << "\n예약할 열을 입력해주세요 : ";
+            cin >> row;
+            try
+            {
+                if (row < 0 || row > 5)
+                {
+                    throw(row);
+                }
+
+                cn = header[row - 1];
+
+                cout << "\n예약할 행을 입력해주세요 : ";
+                cin >> col;
+                try
+                {
+                    if (col < 0 || col > 10)
+                    {
+                        throw(col);
+                    }
+                    else
+                    {
+                        int i = 1;
+                        while (i < col)
+                        {
+                            cn = cn->next;
+                            i++;
+                        }
+
+                        if (cn->fill == false)
+                        {
+                            cout << "\n좌석을 예약합니다!";
+
+                            cn->name = id;
+                            cn->fill = true;
+                        }
+
+                        else
+                        {
+                            cout << "\n이미 예약된 좌석입니다!";
+                        }
+                    }
+                }
+                catch (int r)
+                {
+                    cout << "\n행을 잘못 입력하셨습니다." << r;
+                }
+            }
+            catch (int r)
+            {
+                cout << " \n열을 잘못 입력하셨습니다." << r;
+            }
+        }
+        else
+            cout << "등록되지 않은 ID입니다." << endl;
+    }
+
+    void cancle(string idcheck)//id확인을 위한 파라미터 1개
+    // 예약을 취소하는 함수
+    // ID가 일치하면
+    // 예약한 행과 열을 입력받고 
+    // 예약목록에서 삭제
+    {
+        int r, c; //r = 열, c = 행
+        int i = 1;
+
+        if (listcheck(idcheck) == true) //id 확인(일치하면)
+        {
+            cout << "\n예약한 열을 입력해주세요 : ";
+            cin >> r;
+
+            try
+            {
+                if (r < 0 || r > 5)
+                {
+                    throw(r);
+                }
+
+                else
+                {
+                    cout << "\n예약한 행을 입력해주세요 : ";
+                    cin >> c;
+
+                    try
+                    {
+                        if (c < 0 || c > 10)
+                        {
+                            throw(c);
+                        }
+                        else
+                        {
+                            cn = header[r - 1];
+                            while (i < c)
+                            {
+                                cn = cn->next;
+                                i++;
+                            }
+                            i = 0;
+                            if (cn->fill != 0)
+                            {
+                                cn->name = idcheck;
+
+                                cout << "\n예약이 취소되었습니다!\n예약 취소된 ID : " << cn->name;
+                                //삭제된 내역(이름)을 알려준다.
+
+                                cn->name = 'A';
+                                cn->name = '\0';
+                                cn->fill = false;
+                                cn->num++;
+                            }
+                        }
+                    }
+                    catch (int r)
+                    {
+                        cout << "\n행을 잘못 입력하셨습니다." << r;
+                    }
+                }
+
+            }
+            catch (int r)
+            {
+                cout << " \n열을 잘못 입력하셨습니다." << r;
+            }
+        }
+        else {
+            cout << "등록되지 않은 ID입니다." << endl;
+            r = 1;
+            i = 0;
+        }
+    }
+
+    void upgrade(int check) //check == row == 열 번호, (A, B, C, D)
+         // 예약을 수정하는 함수
+         // 해당 층과 방 번호, 그리고 예약한 사람의 이름을 입력받고
+         // 수정할 사람의 이름을 입력한 후 이름 수정
+    {
+        string id;
+        int seat, i = 1; //room == seat == 좌석번호
+        try
+        {
+            if (check < 0 || check > 5)
+
+            {
+                throw(check);
+            }
+            else
+            {
+                cout << "\n예약한 행을 입력해주세요 : ";
+                cin >> seat;
+
+                try
+                {
+                    if (seat < 0 || seat > 10)
+
+                    {
+                        throw(seat);
+                    }
+                    else
+                    {
+                        cout << "\n예약한 ID를 입력해주세요. :";
+
+                        cin >> id;
+
+                        cn = header[check - 1];
+                        while (i < seat)
+                        {
+                            cn = cn->next;
+                            i++;
+                        }
+
+                        if (cn->fill == false)
+                        {
+                            cout << "\n예약된 좌석이 아닙니다." << endl;
+                        }
+                        else if (listcheck(id))
+                        {
+                            cout << "\n수정할 ID를 입력해주세요 : ";
+                            cin >> cn->name;
+
+                            cout << "\n수정이 완료되었습니다!\n수정 전 ID : " << id << "\n수정 후 ID : " << cn->name;
+                        }
+                        else
+                        {
+                            cout << "\n기록을 찾지못하였습니다.";
+                        }
+
+                    }
+                }
+                catch (int r)
+                {
+                    cout << "\n행을 잘못 입력하셨습니다." << r;
+                }
+            }
+        }
+
+        catch (int r)
+
+        {
+            cout << "\n열을 잘못 입력하셨습니다." << r;
+        }
+    }
+};
+
+int main()
+{
+    Train obj;
+    // 클래스 생성
+
+    int key;
+    // 케이스문을 실행하기위한 변수 (1~6)
+
+    char ch;
+    // Y나 N를 저장하는 변수
+
+    int rowcheck;
+    // 열을 저장하는 변수
+
+    string id;
+    //id를 저장하는 변수
+
+    obj.create();
+    // obj의 멤버함수 create실행
+
+    cout << "\n[ 기차 예약 ]" << endl;
+
+    do
+    {
+        cout << "\n1. 좌석 예약\n2. 좌석 상태 확인\n3. 예약 취소\n4. 예약 수정\n5. 회원 가입\n6. 회원 조회" << endl;
+        cout << ">> 번호를 선택해주세요 : ";
+        cin >> key;
+
+        switch (key)
+        {
+        case 1:
+        {
+            cout << "예약할 ID를 입력해주세요 : ";
+            cin >> id;
+
+            obj.book(id);
+            //book함수 실행
+
+            break;
+        }
+        case 2:
+        {
+            obj.display();
+            //display 함수 실행
+
+            break;
+        }
+        case 3:
+        {
+            cout << "예약한 ID를 입력해주세요 : ";
+            cin >> id;
+
+            obj.cancle(id);
+            //cancle함수 실행
+
+            break;
+        }
+        case 4:
+        {
+            cout << "예약한 열을 입력해주세요 : ";
+            cin >> rowcheck;
+            // 열 확인
+
+            obj.upgrade(rowcheck);
+            // 열을 매개변수로 upgrade함수 실행
+
+            break;
+        }
+
+        case 5:
+        {
+            obj.join();
+            break;
+        }
+
+        case 6:
+        {
+            obj.joinlist();
+            break;
+        }
+
+        default:
+            cout << "\n잘못된 입력입니다.";
+            // 1~6이 아닐경우 "Invalid choice" 출력
+        }
+
+        cout << "\n계속 진행하시겠습니다?(Y / N) ";
+        cin >> ch;
+        // 에약을 계속할지를 묻는 코드
+
+    } while (ch == 'Y' || ch == 'y');
+    // Y입력시 예약을 처음부터 다시 진행
+}
